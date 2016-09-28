@@ -1,16 +1,18 @@
 var express = require('express'),
     app = express(),
-    crypto = require('crypto'),
-    MongoClient = require('mongodb').MongoClient;
+    routes = require('./routes'),
+    userRoutes = require('./users/routes'),
+    mongoose = require('mongoose');
 
-MongoClient.connect("mongodb://localhost:27017/homeblame", function(err, db) {
+// connect to database
+mongoose.connect('mongodb://localhost:27017/homeblame');
 
-    app.get('/api/health', function(req, res) {
-        return res.send("API Passed Health Check");
-    });
+// set up routes
+app.use('/api', routes);
+app.use('/api/u', userRoutes);
 
-    var server = app.listen(3000, function() {
-        var port = server.address().port;
-        console.log("Express server listening on port %s.", port);
-    });
+// start server
+var server = app.listen(3000, function() {
+    var port = server.address().port;
+    console.log("Express server listening on port %s.", port);
 });
