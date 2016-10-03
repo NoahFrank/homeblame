@@ -2,10 +2,15 @@ var express = require('express'),
     app = express(),
     healthRoutes = require('./health/routes'),
     userRoutes = require('./users/routes'),
-    mongoose = require('mongoose');
+    mongoose = require('mongoose'),
+    bodyParser = require('body-parser');
 
 // connect to database
 mongoose.connect('mongodb://localhost:27017/homeblame');
+
+//
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 // set up routes
 app.use('/api/u', userRoutes);
