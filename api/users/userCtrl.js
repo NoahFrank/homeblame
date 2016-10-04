@@ -20,8 +20,18 @@ module.exports = {
         });
     },
 
+    getUser : function (req, res) {
+        User.findById(req.params.uid, function (err, user) {
+            if (err) res.send({"error": err});
+            res.send(user);
+        });
+    },
+
     removeUser : function (req, res) {
-        // TODO
+        User.findByIdAndRemove({ _id: req.params.uid }, function (err, user) {
+          if (err) res.send({"error": err});
+          res.send({"Status": "Successful"});
+        });
     },
 
     updateUser : function (req, res) {
@@ -31,13 +41,6 @@ module.exports = {
                 if (err) res.send({"error": err});
                 res.send(user);
             })
-        });
-    },
-
-    getUser : function (req, res) {
-        User.findById(req.params.uid, function (err, user) {
-            if (err) res.send({"error": err});
-            res.send(user);
         });
     }
 }

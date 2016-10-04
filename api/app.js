@@ -3,12 +3,13 @@ var express = require('express'),
     healthRoutes = require('./health/routes'),
     userRoutes = require('./users/routes'),
     mongoose = require('mongoose'),
-    bodyParser = require('body-parser');
+    bodyParser = require('body-parser'),
+    config = require('config');
 
 // connect to database
-mongoose.connect('mongodb://localhost:27017/homeblame');
+mongoose.connect(config.get('DBHost'));
 
-//
+// Middleware for parsing input
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -21,3 +22,5 @@ var server = app.listen(3000, function() {
     var port = server.address().port;
     console.log("Express server listening on port %s.", port);
 });
+
+module.exports = app; // for testing
