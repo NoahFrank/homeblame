@@ -3,7 +3,7 @@ var User = require('./userModel');
 module.exports = {
     getUsers : function (req, res) {
         User.find({} , function (err, users) {
-            if (err) res.send({"error": err});
+            if (err) handleError(err, res);
             res.send(users);
         });
     },
@@ -15,7 +15,7 @@ module.exports = {
         newUser.email = req.body.email;
         newUser.password = req.body.password;
         newUser.save({}, function (err, user) {
-            if (err) res.send({"error": err});
+            if (err) handleError(err, res);
             res.send(user);
         });
     },
@@ -26,9 +26,9 @@ module.exports = {
 
     updateUser : function (req, res) {
         User.findByIdAndUpdate({ _id: req.params.uid }, req.body, function (err, user) {
-            if (err) res.send({"error": err});
+            if (err) handleError(err, res);
             User.findById(req.params.uid, function (err, user) {
-                if (err) res.send({"error": err});
+                if (err) handleError(err, res);
                 res.send(user);
             })
         });
@@ -36,8 +36,19 @@ module.exports = {
 
     getUser : function (req, res) {
         User.findById(req.params.uid, function (err, user) {
-            if (err) res.send({"error": err});
+            if (err) handleError(err, res);
             res.send(user);
         });
     }
+
 };
+
+function handleError(err, res) {
+    var errorMsg = {errorCode: err.code, message: "Unknown Error"};
+    var status = 500; // Internal Server Error
+    if (err.code == 11000) { // Duplicate key error code
+        status = 409; // Conflict HTTP error code
+        errorMsg.message = "User with the email: " +res.req.body.email+ " already exists";
+    }
+    return res.status(status).send(errorMsg);
+}
