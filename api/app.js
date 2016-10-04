@@ -1,6 +1,6 @@
 var express = require('express'),
     app = express(),
-    healthRoutes = require('./health/routes'),
+    // healthRoutes = require('./health/routes'),
     userRoutes = require('./users/routes'),
     mongoose = require('mongoose'),
     bodyParser = require('body-parser'),
@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 
 // set up routes
 app.use('/api/u', userRoutes);
-app.use('/api/health', healthRoutes);
+// app.use('/api/health', healthRoutes);
 
 // start server
 var server = app.listen(3000, function() {
@@ -23,4 +23,4 @@ var server = app.listen(3000, function() {
     console.log("Express server listening on port %s.", port);
 });
 
-module.exports = app; // for testing
+module.exports = server;
