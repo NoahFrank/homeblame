@@ -27,7 +27,7 @@ describe("User API", function() {
     ];
 
     describe("GET /api/u/ to get users", function () {
-        it('return nothing', function (done) {
+        it('return when no users in database', function (done) {
             chai.request(app)
                 .get('/api/u/')
                 .end(function (err, res) {
@@ -90,7 +90,7 @@ describe("User API", function() {
                     done();
                 });
         });
-        it("adds user to database", function(done) {
+        it("properly adds user to database", function(done) {
             var testUser = deepcopy(testUsers[1]);
             chai.request(app)
                 .post('/api/u/add')
@@ -121,7 +121,7 @@ describe("User API", function() {
     });
 
     describe("GET /api/u/:uid lookup specific user", function () {
-        it("retrieves a non-existent user from the database", function (done) {
+        it("retrieve a non-existent user from the database", function (done) {
             chai.request(app)
                 .get('/api/u/' + "53f1dadae7cf8b355811c77e")
                 .end(function (err, res) {
@@ -129,7 +129,19 @@ describe("User API", function() {
 
                     expect(res.body).to.be.a('object');
                     expect(res.body.errorCode).to.eql(404);
-                    expect(res.body.message).to.exist;
+                    expect(res.body.message).to.eql("User does not exist.");
+                    done();
+                });
+        });
+        it("attempt to use an invalid user id", function (done) {
+            chai.request(app)
+                .get('/api/u/' + "53f1dadae7-f8b355811c77e")
+                .end(function (err, res) {
+                    expect(res).to.have.status(404);
+
+                    expect(res.body).to.be.a('object');
+                    expect(res.body.errorCode).to.eql(404);
+                    expect(res.body.message).to.eql("User ID does not exist.");
                     done();
                 });
         });
@@ -162,7 +174,31 @@ describe("User API", function() {
     });
 
     describe('PATCH /api/u/update/:uid to update a specific user', function (done) {
-        it('it should PATCH a user', function (done) {
+        it("retrieve a non-existent user to update from the database", function (done) {
+            chai.request(app)
+                .get('/api/u/update/' + "53f1dadae7cf8b355811c77e")
+                .end(function (err, res) {
+                    expect(res).to.have.status(404);
+
+                    expect(res.body).to.be.a('object');
+                    expect(res.body.errorCode).to.eql(404);
+                    expect(res.body.message).to.eql("User ID does not exist.");
+                    done();
+                });
+        });
+        it("attempt to use an invalid user id", function (done) {
+            chai.request(app)
+                .get('/api/u/update/' + "53f1dadae7-f8b355811c77e")
+                .end(function (err, res) {
+                    expect(res).to.have.status(404);
+
+                    expect(res.body).to.be.a('object');
+                    expect(res.body.errorCode).to.eql(404);
+                    expect(res.body.message).to.eql("User ID does not exist.");
+                    done();
+                });
+        });
+        it('should update a user', function (done) {
             // Add second base user to database
             User.create(testUsers[1], function (err, user) {
                 if (err) return done(err);
