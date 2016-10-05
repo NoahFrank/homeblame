@@ -1,4 +1,4 @@
-var Apart = require('./userApart');
+var Apart = require('./apartModel');
 var handleAPIError = require('../util/utils').handleAPIError;
 
 module.exports = {

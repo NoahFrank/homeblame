@@ -2,6 +2,7 @@
 var app = require("../../app");
 
 // Testing requires
+var deepcopy = require('deepcopy');
 var expect = require("chai").expect;
 var chai = require("chai");
 var chaiHttp = require('chai-http');
@@ -25,55 +26,81 @@ describe("User API", function() {
         {firstName: 'Ryan', lastName: 'Tyrella', email: 'tyrella@gmail.com', password: 'test'}
     ];
 
-    before(function(done) {
-        User.create(testUsers, function (err) {
-            expect(err).to.be.null;
-            done();
-        });
-    });
-
-    describe("Get all users", function() {
-        it("returns all users in the user database", function(done) {
+    describe("GET /api/u/ to get users", function () {
+        it('return nothing', function (done) {
             chai.request(app)
                 .get('/api/u/')
-                .end(function(err, res) {
-                    expect(err).to.be.null;
-                    expect(res).to.have.status(200); // status and json from chai-http
-                    expect(res).to.be.json;
+                .end(function (err, res) {
+                    if (err) return done(err);
+                    expect(res).to.have.status(200);
                     expect(res.body).to.be.a('array');
-                    expect(res.body).to.have.lengthOf(2);
-
-                    var testTom = res.body[0];
-                    var testRyan = res.body[1];
-
-                    expect(testTom.firstName).to.equal(testUsers[0].firstName);
-                    expect(testTom.lastName).to.equal(testUsers[0].lastName);
-                    expect(testTom.email).to.equal(testUsers[0].email);
-                    expect(testTom.password).to.equal(testUsers[0].password);
-
-                    expect(testRyan.firstName).to.equal(testUsers[1].firstName);
-                    expect(testRyan.lastName).to.equal(testUsers[1].lastName);
-                    expect(testRyan.email).to.equal(testUsers[1].email);
-                    expect(testRyan.password).to.equal(testUsers[1].password);
-
+                    expect(res.body).to.have.lengthOf(0);
                     done();
                 });
         });
+        it('returns all users in the user database', function (done) {
+            User.create(testUsers, function (err) {
+                if (err) return done(err);
+                chai.request(app)
+                    .get('/api/u/')
+                    .end(function (err, res) {
+                        if (err) return done(err);
+                        expect(res).to.have.status(200); // status and json from chai-http
+                        expect(res).to.be.json;
+                        expect(res.body).to.be.a('array');
+                        expect(res.body).to.have.lengthOf(2);
+
+                        var testTom = res.body[0];
+                        var testRyan = res.body[1];
+
+                        expect(testTom.firstName).to.equal(testUsers[0].firstName);
+                        expect(testTom.lastName).to.equal(testUsers[0].lastName);
+                        expect(testTom.email).to.equal(testUsers[0].email);
+                        expect(testTom.password).to.equal(testUsers[0].password);
+
+                        expect(testRyan.firstName).to.equal(testUsers[1].firstName);
+                        expect(testRyan.lastName).to.equal(testUsers[1].lastName);
+                        expect(testRyan.email).to.equal(testUsers[1].email);
+                        expect(testRyan.password).to.equal(testUsers[1].password);
+
+                        done();
+                    });
+            });
+        });
+        after(function (done) {
+            User.remove({}, function (err) {
+                if (err) return done(err);
+                done();
+            });
+        });
     });
 
-    describe("Add user", function() {
+    describe('POST /api/u/add/ to create a user', function () {
+        it ('should not POST a user without a firstName field', function (done) {
+            var user = deepcopy(testUsers[0]);
+            delete user.firstName;
+            chai.request(app)
+                .post('/api/u/add/')
+                .send(user)
+                .end( function (err, res) {
+                    expect(res).to.have.status(500);
+                    expect(res.body).to.be.a('object');
+                    expect(res.body).to.have.property('errorCode');
+                    expect(res.body).to.have.property('message');
+                    done();
+                });
+        });
         it("adds user to database", function(done) {
-            var testUser = {firstName: 'Noah', lastName: 'Frank', email: 'naf@rit.edu', password: 'tester'};
+            var testUser = deepcopy(testUsers[1]);
             chai.request(app)
                 .post('/api/u/add')
                 .send(testUser)
                 .end(function(err, res) {
-                    expect(err).to.be.null;
+                    if (err) return done(err);
                     expect(res).to.have.status(200);
 
                     User.findOne(testUser, function(err, user) {
-                        expect(err).to.be.null;
-
+                        if (err) return done(err);
                         expect(user._doc).to.be.a('object');
                         // Remove added mongo stuff so we can deep compare
                         delete user._doc._id;
@@ -85,59 +112,91 @@ describe("User API", function() {
                     });
                 });
         });
-    });
-
-    describe("Get a specific user", function() {
-        it("retrieves a user from the database", function(done) {
-          var user = new User({firstName: 'Colin', lastName: 'Thatcher', email: 'cmt@rit.edu', password: 'tester'});
-          user.save(function (err, user) {
-            chai.request(app)
-                .get('/api/u/' + user.id)
-                .end(function(err, res) {
-                    expect(err).to.be.null;
-                    expect(res).to.have.status(200);
-
-                    expect(res.body).to.be.object;
-                    expect(res.body).to.have.firstName;
-                    expect(res.body).to.have.lastName;
-                    expect(res.body).to.have.email;
-                    expect(res.body).to.have.password;
-
-                    done();
-                });
-          });
+        after(function (done) {
+            User.remove({}, function(err) {
+                if (err) return done(err);
+                done();
+            });
         });
     });
 
-    // describe("Update a specific user", function() {
-    //     it("updates a user from the database", function(done) {
-    //       var userData = {firstName: 'Colin', lastName: 'Thatcher', email: 'cmt@rit.edu', password: 'tester'};
-    //       var user = new User(userData);
-    //       // User.find({}, function (err, users) {
-    //       //   console.log(users);
-    //       // });
-    //       user.save(function (err, user) {
-    //         console.log(user);
-    //         userData.firstName = "Noah";
-    //         chai.request(app)
-    //             .patch('/api/u/update' + user.id)
-    //             .send(userData)
-    //             .end(function(err, res) {
-    //                 expect(err).to.be.null;
-    //                 expect(res).to.have.status(200);
-    //
-    //                 // expect(res.body).to.be.object;
-    //                 // expect(res.body).to.have.firstName.equal("Noah");
-    //                 done();
-    //             });
-    //       });
-    //     });
-    // });
+    describe("GET /api/u/:uid lookup specific user", function () {
+        it("retrieves a user from the database", function (done) {
+            var testUser = deepcopy(testUsers[1]);
+            User.create(testUser, function (err, user) {
+                if (err) return done(err);
+                chai.request(app)
+                    .get('/api/u/' + user._id)
+                    .end(function (err, res) {
+                        if (err) return done(err);
+                        expect(res).to.have.status(200);
 
-    afterEach(function (done) {
-        User.remove({}, function() {
-            done();
+                        expect(res.body).to.be.object;
+                        expect(res.body).to.have.firstName;
+                        expect(res.body).to.have.lastName;
+                        expect(res.body).to.have.email;
+                        expect(res.body).to.have.password;
+
+                        done();
+                    });
+            });
+        });
+        after(function (done) {
+            User.remove({}, function(err) {
+                if (err) return done(err);
+                done();
+            });
         });
     });
 
+    describe('PATCH /api/u/update/:uid to update a specific user', function (done) {
+        it('it should PATCH a user', function (done) {
+            // Add second base user to database
+            User.create(testUsers[1], function (err, user) {
+                if (err) return done(err);
+                // Create copy of second user and modify name then attempt patch
+                var testUser = deepcopy(testUsers[1]);
+                testUser.firstName = "Bob";
+                chai.request(app)
+                    .patch('/api/u/update/' + user._id)
+                    .send(testUser)
+                    .end(function (err, res) {
+                        expect(res).to.have.status(200);
+                        expect(res.body).to.be.a('object');
+                        expect(res.body.firstName).to.eql(testUser.firstName);
+                        expect(res.body.firstName).to.not.eql(testUsers[1].firstName);
+                        done();
+                    });
+            });
+        });
+        after(function (done) {
+            User.remove({}, function(err) {
+                if (err) return done(err);
+                done();
+            });
+        });
+    });
+
+    describe('DELETE /api/u/remove/:uid to remove a specific user', function (done) {
+        it ('it should remove a user', function (done) {
+            User.create(testUsers[0], function (err, user) {
+                if (err) return done(err);
+                chai.request(app)
+                    .delete('/api/u/remove/' + user.id)
+                    .end(function (err, res) {
+                        if (err) return done(err);
+                        expect(res).to.have.status(200);
+                        expect(res.body).to.be.a('object');
+                        expect(res.body.Status).to.eql("Successful");
+                        done();
+                    });
+            });
+        });
+        after(function (done) {
+            User.remove({}, function(err) {
+                if (err) return done(err);
+                done();
+            });
+        });
+    });
 });
