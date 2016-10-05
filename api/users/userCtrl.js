@@ -1,3 +1,5 @@
+var isObject = require('lodash').isObject;
+
 var User = require('./userModel');
 var handleAPIError = require('../util/utils').handleAPIError;
 
@@ -38,10 +40,12 @@ module.exports = {
         });
     },
 
-    getUser : function (req, res) {
+    getUser: function (req, res) {
         User.findById(req.params.uid, function (err, user) {
             if (err) handleAPIError(err, res);
-            res.send(user);
+            isObject(user) ?
+                res.send(user) :
+                res.status(404).send({errorCode: 404, message: "User does not exist"});
         });
     }
 

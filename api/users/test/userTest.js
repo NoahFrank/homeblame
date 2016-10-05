@@ -67,7 +67,7 @@ describe("User API", function() {
                     });
             });
         });
-        after(function (done) {
+        afterEach(function (done) {
             User.remove({}, function (err) {
                 if (err) return done(err);
                 done();
@@ -112,7 +112,7 @@ describe("User API", function() {
                     });
                 });
         });
-        after(function (done) {
+        afterEach(function (done) {
             User.remove({}, function(err) {
                 if (err) return done(err);
                 done();
@@ -121,6 +121,18 @@ describe("User API", function() {
     });
 
     describe("GET /api/u/:uid lookup specific user", function () {
+        it("retrieves a non-existent user from the database", function (done) {
+            chai.request(app)
+                .get('/api/u/' + "53f1dadae7cf8b355811c77e")
+                .end(function (err, res) {
+                    expect(res).to.have.status(404);
+
+                    expect(res.body).to.be.a('object');
+                    expect(res.body.errorCode).to.eql(404);
+                    expect(res.body.message).to.exist;
+                    done();
+                });
+        });
         it("retrieves a user from the database", function (done) {
             var testUser = deepcopy(testUsers[1]);
             User.create(testUser, function (err, user) {
@@ -131,17 +143,17 @@ describe("User API", function() {
                         if (err) return done(err);
                         expect(res).to.have.status(200);
 
-                        expect(res.body).to.be.object;
-                        expect(res.body).to.have.firstName;
-                        expect(res.body).to.have.lastName;
-                        expect(res.body).to.have.email;
-                        expect(res.body).to.have.password;
+                        expect(res.body).to.be.a('object');
+                        expect(res.body.firstName).to.exist;
+                        expect(res.body.lastName).to.exist;
+                        expect(res.body.email).to.exist;
+                        expect(res.body.password).to.exist;
 
                         done();
                     });
             });
         });
-        after(function (done) {
+        afterEach(function (done) {
             User.remove({}, function(err) {
                 if (err) return done(err);
                 done();
@@ -169,7 +181,7 @@ describe("User API", function() {
                     });
             });
         });
-        after(function (done) {
+        afterEach(function (done) {
             User.remove({}, function(err) {
                 if (err) return done(err);
                 done();
@@ -192,7 +204,7 @@ describe("User API", function() {
                     });
             });
         });
-        after(function (done) {
+        afterEach(function (done) {
             User.remove({}, function(err) {
                 if (err) return done(err);
                 done();
