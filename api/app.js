@@ -1,20 +1,21 @@
 var express = require('express'),
     app = express(),
-    // healthRoutes = require('./health/routes'),
+    healthRoutes = require('./health/routes'),
     userRoutes = require('./users/routes'),
     mongoose = require('mongoose'),
-    bodyParser = require('body-parser');
+    bodyParser = require('body-parser'),
+    config = require('config');
 
 // connect to database
-mongoose.connect('mongodb://localhost:27017/homeblame');
+mongoose.connect(config.get('DBHost'));
 
-//
+// Middleware for parsing input
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // set up routes
 app.use('/api/u', userRoutes);
-// app.use('/api/health', healthRoutes);
+app.use('/api/health', healthRoutes);
 
 // start server
 var server = app.listen(3000, function() {
