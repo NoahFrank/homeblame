@@ -27,6 +27,12 @@ describe("User API", function() {
     ];
 
     describe("GET /api/u/ to get users", function () {
+        beforeEach(function (done) {
+            User.remove({}, function (err) {
+                if (err) return done(err);
+                done();
+            });
+        });
         it('return when no users in database', function (done) {
             chai.request(app)
                 .get('/api/u/')
@@ -67,15 +73,15 @@ describe("User API", function() {
                     });
             });
         });
-        afterEach(function (done) {
-            User.remove({}, function (err) {
+    });
+
+    describe('POST /api/u/add/ to create a user', function () {
+        beforeEach(function (done) {
+            User.remove({}, function(err) {
                 if (err) return done(err);
                 done();
             });
         });
-    });
-
-    describe('POST /api/u/add/ to create a user', function () {
         it ('should not POST a user without a firstName field', function (done) {
             var user = deepcopy(testUsers[0]);
             delete user.firstName;
@@ -112,15 +118,15 @@ describe("User API", function() {
                     });
                 });
         });
-        afterEach(function (done) {
+    });
+
+    describe("GET /api/u/:uid lookup specific user", function () {
+        beforeEach(function (done) {
             User.remove({}, function(err) {
                 if (err) return done(err);
                 done();
             });
         });
-    });
-
-    describe("GET /api/u/:uid lookup specific user", function () {
         it("retrieve a non-existent user from the database", function (done) {
             chai.request(app)
                 .get('/api/u/' + "53f1dadae7cf8b355811c77e")
@@ -165,18 +171,18 @@ describe("User API", function() {
                     });
             });
         });
-        afterEach(function (done) {
+    });
+
+    describe('PATCH /api/u/update/:uid to update a specific user', function (done) {
+        beforeEach(function (done) {
             User.remove({}, function(err) {
                 if (err) return done(err);
                 done();
             });
         });
-    });
-
-    describe('PATCH /api/u/update/:uid to update a specific user', function (done) {
         it("retrieve a non-existent user to update from the database", function (done) {
             chai.request(app)
-                .get('/api/u/update/' + "53f1dadae7cf8b355811c77e")
+                .patch('/api/u/update/' + "53f1dadae7cf8b355811c77e")
                 .end(function (err, res) {
                     expect(res).to.have.status(404);
 
@@ -188,7 +194,7 @@ describe("User API", function() {
         });
         it("attempt to use an invalid user id", function (done) {
             chai.request(app)
-                .get('/api/u/update/' + "53f1dadae7-f8b355811c77e")
+                .patch('/api/u/update/' + "53f1dadae7-f8b355811c77e")
                 .end(function (err, res) {
                     expect(res).to.have.status(404);
 
@@ -217,15 +223,15 @@ describe("User API", function() {
                     });
             });
         });
-        afterEach(function (done) {
+    });
+
+    describe('DELETE /api/u/remove/:uid to remove a specific user', function (done) {
+        beforeEach(function (done) {
             User.remove({}, function(err) {
                 if (err) return done(err);
                 done();
             });
         });
-    });
-
-    describe('DELETE /api/u/remove/:uid to remove a specific user', function (done) {
         it ('it should remove a user', function (done) {
             User.create(testUsers[0], function (err, user) {
                 if (err) return done(err);
@@ -238,12 +244,6 @@ describe("User API", function() {
                         expect(res.body.Status).to.eql("Successful");
                         done();
                     });
-            });
-        });
-        afterEach(function (done) {
-            User.remove({}, function(err) {
-                if (err) return done(err);
-                done();
             });
         });
     });
