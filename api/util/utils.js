@@ -5,6 +5,7 @@ module.exports = {
         var errorMsg = {errorCode: 500, message: "Unknown Error"}; // Internal Server Error
         if (err.code == 11000) { // Duplicate key error code
             errorMsg.errorCode = 409; // Conflict HTTP error code
+            // TODO: Specific to User module, but not a problem yet because only User has unique state
             errorMsg.message = "User with the email: " +res.req.body.email+ " already exists";
         }
         return res.status(errorMsg.errorCode).send(errorMsg);

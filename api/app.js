@@ -2,6 +2,7 @@ var express = require('express'),
     app = express(),
     healthRoutes = require('./health/routes'),
     userRoutes = require('./users/routes'),
+    apartRoutes = require('./apartment/routes'),
     mongoose = require('mongoose'),
     bodyParser = require('body-parser'),
     config = require('config');
@@ -15,6 +16,7 @@ app.use(bodyParser.json());
 
 // set up routes
 app.use('/api/u', userRoutes);
+app.use('/api/a', apartRoutes);
 app.use('/api/health', healthRoutes);
 
 // start server
