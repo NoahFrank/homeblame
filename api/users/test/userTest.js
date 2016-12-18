@@ -27,7 +27,13 @@ describe("User API", function() {
     ];
 
     describe("GET /api/u/ to get users", function () {
-        it('return nothing', function (done) {
+        beforeEach(function (done) {
+            User.remove({}, function (err) {
+                if (err) return done(err);
+                done();
+            });
+        });
+        it('return when no users in database', function (done) {
             chai.request(app)
                 .get('/api/u/')
                 .end(function (err, res) {
@@ -67,15 +73,15 @@ describe("User API", function() {
                     });
             });
         });
-        after(function (done) {
-            User.remove({}, function (err) {
+    });
+
+    describe('POST /api/u/add/ to create a user', function () {
+        beforeEach(function (done) {
+            User.remove({}, function(err) {
                 if (err) return done(err);
                 done();
             });
         });
-    });
-
-    describe('POST /api/u/add/ to create a user', function () {
         it ('should not POST a user without a firstName field', function (done) {
             var user = deepcopy(testUsers[0]);
             delete user.firstName;
@@ -90,7 +96,7 @@ describe("User API", function() {
                     done();
                 });
         });
-        it("adds user to database", function(done) {
+        it("properly adds user to database", function(done) {
             var testUser = deepcopy(testUsers[1]);
             chai.request(app)
                 .post('/api/u/add')
@@ -112,15 +118,39 @@ describe("User API", function() {
                     });
                 });
         });
-        after(function (done) {
+    });
+
+    describe("GET /api/u/:uid lookup specific user", function () {
+        beforeEach(function (done) {
             User.remove({}, function(err) {
                 if (err) return done(err);
                 done();
             });
         });
-    });
+        it("retrieve a non-existent user from the database", function (done) {
+            chai.request(app)
+                .get('/api/u/' + "53f1dadae7cf8b355811c77e")
+                .end(function (err, res) {
+                    expect(res).to.have.status(404);
 
-    describe("GET /api/u/:uid lookup specific user", function () {
+                    expect(res.body).to.be.a('object');
+                    expect(res.body.errorCode).to.eql(404);
+                    expect(res.body.message).to.eql("User does not exist.");
+                    done();
+                });
+        });
+        it("attempt to use an invalid user id", function (done) {
+            chai.request(app)
+                .get('/api/u/' + "53f1dadae7-f8b355811c77e")
+                .end(function (err, res) {
+                    expect(res).to.have.status(404);
+
+                    expect(res.body).to.be.a('object');
+                    expect(res.body.errorCode).to.eql(404);
+                    expect(res.body.message).to.eql("User ID does not exist.");
+                    done();
+                });
+        });
         it("retrieves a user from the database", function (done) {
             var testUser = deepcopy(testUsers[1]);
             User.create(testUser, function (err, user) {
@@ -131,26 +161,50 @@ describe("User API", function() {
                         if (err) return done(err);
                         expect(res).to.have.status(200);
 
-                        expect(res.body).to.be.object;
-                        expect(res.body).to.have.firstName;
-                        expect(res.body).to.have.lastName;
-                        expect(res.body).to.have.email;
-                        expect(res.body).to.have.password;
+                        expect(res.body).to.be.a('object');
+                        expect(res.body.firstName).to.exist;
+                        expect(res.body.lastName).to.exist;
+                        expect(res.body.email).to.exist;
+                        expect(res.body.password).to.exist;
 
                         done();
                     });
             });
         });
-        after(function (done) {
+    });
+
+    describe('PATCH /api/u/update/:uid to update a specific user', function (done) {
+        beforeEach(function (done) {
             User.remove({}, function(err) {
                 if (err) return done(err);
                 done();
             });
         });
-    });
+        it("retrieve a non-existent user to update from the database", function (done) {
+            chai.request(app)
+                .patch('/api/u/update/' + "53f1dadae7cf8b355811c77e")
+                .end(function (err, res) {
+                    expect(res).to.have.status(404);
 
-    describe('PATCH /api/u/update/:uid to update a specific user', function (done) {
-        it('it should PATCH a user', function (done) {
+                    expect(res.body).to.be.a('object');
+                    expect(res.body.errorCode).to.eql(404);
+                    expect(res.body.message).to.eql("User ID does not exist.");
+                    done();
+                });
+        });
+        it("attempt to use an invalid user id", function (done) {
+            chai.request(app)
+                .patch('/api/u/update/' + "53f1dadae7-f8b355811c77e")
+                .end(function (err, res) {
+                    expect(res).to.have.status(404);
+
+                    expect(res.body).to.be.a('object');
+                    expect(res.body.errorCode).to.eql(404);
+                    expect(res.body.message).to.eql("User ID does not exist.");
+                    done();
+                });
+        });
+        it('should update a user', function (done) {
             // Add second base user to database
             User.create(testUsers[1], function (err, user) {
                 if (err) return done(err);
@@ -169,15 +223,15 @@ describe("User API", function() {
                     });
             });
         });
-        after(function (done) {
+    });
+
+    describe('DELETE /api/u/remove/:uid to remove a specific user', function (done) {
+        beforeEach(function (done) {
             User.remove({}, function(err) {
                 if (err) return done(err);
                 done();
             });
         });
-    });
-
-    describe('DELETE /api/u/remove/:uid to remove a specific user', function (done) {
         it ('it should remove a user', function (done) {
             User.create(testUsers[0], function (err, user) {
                 if (err) return done(err);
@@ -190,12 +244,6 @@ describe("User API", function() {
                         expect(res.body.Status).to.eql("Successful");
                         done();
                     });
-            });
-        });
-        after(function (done) {
-            User.remove({}, function(err) {
-                if (err) return done(err);
-                done();
             });
         });
     });

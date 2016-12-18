@@ -5,10 +5,9 @@ module.exports = {
 
     addApart : function (req, res) {
         var newApart = new Apart();
-        newApart.dwellers.push(req.body.creator);
-        newApart.bathrooms.push(req.body.bathrooms);
-        newApart.name = req.body.name;
-        newApart.utilities.push(req.body.password);
+        newApart.name = req.body.name; // TODO: Alpha-numeric only?
+        newApart.dwellers.push(req.body.creator); // TODO: Validate creator resembles a username
+        newApart.bathrooms.push(req.body.bathrooms); // TODO: Validate or empty
         newApart.save({}, function (err, apart) {
             if (err) handleAPIError(err, res);
             res.send(apart);
