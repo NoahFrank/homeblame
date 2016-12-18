@@ -1,3 +1,6 @@
+var jwt = require('jsonwebtoken');
+var config = require('config');
+
 module.exports = {
     handleAPIError : function (err, res) {
         // TODO: Handle missing user argument error
@@ -7,5 +10,14 @@ module.exports = {
             errorMsg.message = "User with the email: " +res.req.body.email+ " already exists";
         }
         return res.status(errorMsg.errorCode).send(errorMsg);
+    },
+
+    isAuthenticated : function (req, res, next) {
+        var headers = req.headers;
+        var authToken = headers['authenticated'];
+
+        var decodedToken = jwt.verify(authToken, config.get('secretKey'));
+
+        return next();
     }
 };

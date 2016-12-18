@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var isAuthenticated = require('../util/utils').isAuthenticated;
 
 var userCtrl = require('./userCtrl');
 
