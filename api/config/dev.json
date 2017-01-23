@@ -1,4 +1,4 @@
 {
     "DBHost": "mongodb://localhost:27017/homeblame",
-    "secretKey": "SomethingSecret"
+    "secretKey": "superSecret"
 }

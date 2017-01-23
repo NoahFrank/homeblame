@@ -1,3 +1,4 @@
 {
-    "DBHost": "mongodb://localhost:27017/homeblame-test"
+    "DBHost": "mongodb://localhost:27017/homeblame-test",
+    "secretKey": "testingKey"
 }

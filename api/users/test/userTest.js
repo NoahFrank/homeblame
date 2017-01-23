@@ -14,10 +14,6 @@ var mongoose = require("mongoose");
 var User = require("../userModel");
 var config = require("config");
 
-// Create a new testing connection to the database, cannot use default because server is using it
-// mongoose.createConnection(config.get('DBHost'));
-process.env.NODE_ENV = 'test';
-
 describe("User API", function() {
 
     // Test user data we will insert then use api to retrieve

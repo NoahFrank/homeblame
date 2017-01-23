@@ -19,7 +19,7 @@ module.exports = {
                     res.json({ success: false, message: "Authentication failed. Wrong password."});
                 } else {
                     // generate jwt and return token
-                    var token = jwt.sign(user, config.get('secretKey'), {});
+                    var token = jwt.sign({"userId": user._id}, config.get('secretKey'), {});
                     res.json({ success: true, message: "Success", token: token});
                 }
             }

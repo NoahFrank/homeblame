@@ -24,10 +24,17 @@ module.exports = {
 
     isAuthenticated : function (req, res, next) {
         var headers = req.headers;
-        var authToken = headers['authenticated'];
+        var authToken = headers['authorization'];
 
-        var decodedToken = jwt.verify(authToken, config.get('secretKey'));
-
-        return next();
+        if (authToken !== undefined) {
+            jwt.verify(authToken, config.get('secretKey'), function(err, decoded) {
+                if (err) {
+                    return res.status(401).send({errorCode: 401, message: "Invalid Token."});
+                }
+                return next();
+            });
+        } else {
+            return res.status(403).send({errorCode: 403, message: "Not Authorized"});
+        }
     }
 };

@@ -1,5 +1,4 @@
 {
     "DBHost": "mongodb://localhost:27017/homeblame",
-    "secretKey": "SomethingSecret"
-    // "jwtAlgorithm": "RS256"
+    "secretKey": "superSecret"
 }
