@@ -21,7 +21,7 @@ describe("utils functions", function() {
             var testReq = {};
             testReq.headers = {}
             var testRes = {
-                send: function () {},
+                send: sinon.spy(),
                 status: function (status) {
                     expect(status).to.equal(403);
                     return this;
@@ -29,28 +29,38 @@ describe("utils functions", function() {
             };
             var testNext = sinon.spy();
             utils.isAuthenticated(testReq, testRes, testNext);
+            expect(testRes.send.called);
+            expect(testNext.notCalled);
             done();
         });
         it('returns 401 when token doens\'t validate correctly', function (done) {
             var testReq = {};
             testReq.headers = {authorization: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1ODdmY2E2NzhiY2E5YTAwN2Q4ZGYzMzciLCJpYXQiOjE0ODUxMzQyNzV9.l1eRL4aTKVltmpyOjlgr9FVVCLVOFcOZ19ICR5YBVzY'}
             var testRes = {
-                send: function () {},
+                send: sinon.spy(),
                 status: function (status) {
-                    expect(status).to.equal(401);
+                    expect(status).to.equal(403);
                     return this;
                 }
             };
             var testNext = sinon.spy();
             utils.isAuthenticated(testReq, testRes, testNext);
+            expect(testRes.send.called);
+            expect(testNext.notCalled);
             done();
         });
         it('calls next if the token validate correctly', function (done) {
             var testReq = {};
             testReq.headers = {authorization: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InNkZiJ9.tEn4fDp0P9u9nSDTHNee3NnvArrcOlN5I3zxoIL5dPc'}
-            var testRes = {};
+            var testRes = {
+                send: sinon.spy(),
+                status: function (status) {
+                    return this;
+                }
+            };
             var testNext = sinon.spy();
             utils.isAuthenticated(testReq, testRes, testNext);
+            expect(testRes.notCalled);
             expect(testNext.called);
             done();
         });

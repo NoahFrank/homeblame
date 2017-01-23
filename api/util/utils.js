@@ -25,7 +25,6 @@ module.exports = {
     isAuthenticated : function (req, res, next) {
         var headers = req.headers;
         var authToken = headers['authorization'];
-
         if (authToken !== undefined) {
             jwt.verify(authToken, config.get('secretKey'), function(err, decoded) {
                 if (err) {
@@ -34,7 +33,7 @@ module.exports = {
                 return next();
             });
         } else {
-            return res.status(403).send({errorCode: 403, message: "Not Authorized"});
+            return res.status(403).send({errorCode: 403, message: "Not Authorized."});
         }
     }
 };
