@@ -19,8 +19,8 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "NODE_ENV=test mocha */test/*.js",
-    "start": "./node_modules/nodemon/bin/nodemon.js app.js"
+    "test": "cross-env NODE_ENV=test mocha */test/*.js",
+    "start": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -38,6 +38,7 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-http": "^3.0.0",
+    "cross-env": "^3.1.4",
     "deepcopy": "^0.6.3",
     "mocha": "^3.1.0",
     "sinon": "^1.17.7"
